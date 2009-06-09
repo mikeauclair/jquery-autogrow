@@ -42,6 +42,7 @@
 		this.options		  	= o || {};
 		this.dummy			  	= null;
 		this.interval	 	  	= null;
+		this.set_height			= null;
 		this.line_height	  	= this.options.lineHeight || parseInt(jQuery(e).css('line-height'));
 		this.min_height		  	= this.options.minHeight || parseInt(jQuery(e).css('min-height'));
 		this.max_height		  	= this.options.maxHeight || parseInt(jQuery(e).css('max-height'));;
@@ -83,6 +84,8 @@
 			if (this.dummy == null)
 			{
 				this.dummy = jQuery('<div></div>');
+				this.dummy.comp_text = null;
+				this.dummy.old_height = null;
 				this.dummy.css({
 												'font-size'  : this.textarea.css('font-size'),
 												'font-family': this.textarea.css('font-family'),
@@ -109,8 +112,9 @@
 				html = html.replace(/\n/g, '<br>new');
 			}
 			
-			if (this.dummy.html() != html)
+			if (this.dummy.comp_text != html)
 			{
+				this.dummy.comp_text = html;
 				this.dummy.html(html);	
 				
 				if (this.max_height > 0 && (this.dummy.height() + this.line_height > this.max_height))
@@ -120,9 +124,15 @@
 				else
 				{
 					this.textarea.css('overflow-y', 'hidden');
-					if (this.textarea.height() < this.dummy.height() + this.line_height || (this.dummy.height() < this.textarea.height()))
+					if ((this.dummy.height() != this.dummy.old_height) && (this.textarea.height() < this.dummy.height() + this.line_height || (this.dummy.height() < this.textarea.height())))
 					{	
-						this.textarea.animate({height: (this.dummy.height() + this.line_height) + 'px'}, 100);	
+						this.dummy.old_height = this.dummy.height();
+						var new_height = (this.dummy.height() + this.line_height < this.min_height) ? this.min_height : this.dummy.height() + this.line_height
+						if (this.set_height != new_height)
+						{
+							this.set_height = new_height;
+							this.textarea.animate({height: (new_height) + 'px'}, 100);	
+						}
 					}
 				}
 			}
