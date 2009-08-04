@@ -1,4 +1,10 @@
 /* 
+ * jquery autogrow
+ * 
+ * http://github.com/mikeauclair/jquery-autogrow
+ * 
+ * Fork of:
+ * 
  * Auto Expanding Text Area (1.2.2)
  * by Chrys Bader (www.chrysbader.com)
  * chrysb@gmail.com
@@ -13,7 +19,6 @@
  *
  * NOTE: This script requires jQuery to work.  Download jQuery at www.jquery.com
  *
- *BB: fixed NaN http://plugins.jquery.com/node/4102, http://plugins.jquery.com/node/4103, http://plugins.jquery.com/node/4041, http://plugins.jquery.com/node/4003, http://plugins.jquery.com/node/3444, http://plugins.jquery.com/node/2415
  */
  
 (function(jQuery) {
@@ -43,14 +48,15 @@
 		this.options		  	= o || {};
 		this.dummy			  	= null;
 		this.interval	 	  	= null;
-		this.line_height	  	= this.options.lineHeight || parseInt(jQuery(e).css('line-height'), 10);
-		this.min_height		  	= this.options.minHeight || parseInt(jQuery(e).css('min-height'), 10);
-		this.max_height		  	= this.options.maxHeight || parseInt(jQuery(e).css('max-height'), 10);
+		this.set_height			= null;
+		this.line_height	  	= this.options.lineHeight || parseInt(jQuery(e).css('lineHeight'),10);
+		this.min_height		  	= this.options.minHeight || parseInt(jQuery(e).css('min-height'),10);
+		this.max_height		  	= this.options.maxHeight || parseInt(jQuery(e).css('max-height'),10);;
 		this.textarea		  	= jQuery(e);
 		
-		if(isNaN(this.line_height )) {
+		if(this.line_height == NaN)
 		  this.line_height = 0;
-		}
+		
 		// Only one textarea activated at a time, the one being used
 		this.init();
 	};
@@ -72,7 +78,7 @@
 						 
 		startExpand: function() {				
 		  var self = this;
-			this.interval = window.setInterval(function() {self.checkExpand(); }, 400);
+			this.interval = window.setInterval(function() {self.checkExpand();}, 400);
 		},
 		
 		stopExpand: function() {
@@ -84,51 +90,57 @@
 			if (this.dummy == null)
 			{
 				this.dummy = jQuery('<div></div>');
+				this.dummy.comp_text = null;
+				this.dummy.old_height = null;
 				this.dummy.css({
-												'font-size'     : this.textarea.css('font-size'),
-												'font-family'   : this.textarea.css('font-family'),
-												'width'         : this.textarea.css('width'),
-												'padding-top'   : this.textarea.css('padding-top'),
-												'padding-bottom': this.textarea.css('padding-bottom'),
-												'padding-left'  : this.textarea.css('padding-left'),
-												'padding-right' : this.textarea.css('padding-right'),
-												'line-height'   : this.line_height + 'px',
-												'overflow-x'    : 'hidden',
-												'position'      : 'absolute',
-												'top'           : 0,
-												'left'		    : -9999
+												'font-size'  : this.textarea.css('font-size'),
+												'font-family': this.textarea.css('font-family'),
+												'width'      : this.textarea.css('width'),
+												'padding'    : this.textarea.css('padding'),
+												'line-height': this.textarea.css('line-height'),
+												'overflow-x' : 'hidden',
+												'position'   : 'absolute',
+												'top'        : 0,
+												'left'		 : -9999
 												}).appendTo('body');
 			}
 			
+			
+			
 			// Strip HTML tags
-			// var html = this.textarea.val().replace(/(<|>)/g, '');
-			var html = this.textarea.val().replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
+			var html = this.textarea.val().replace(/(<|>)/g, '');
+			
 			// IE is different, as per usual
-			if (jQuery.browser.msie)
+			if ($.browser.msie)
 			{
-				html = html.replace(/\n/g, '<BR>new');
+				html = html.replace(/\n/g, '<BR>new') + '<BR>new<BR>new';
 			}
 			else
 			{
-				html = html.replace(/\n/g, '<br>new');
+				html = html.replace(/\n/g, '<br>new') + '<br>new<br>new';
 			}
 			
-			if (this.dummy.html() != html ||  this.dummy.html().length === 0)
+			if (this.dummy.comp_text != html)
 			{
+				this.dummy.comp_text = html;
 				this.dummy.html(html);	
 				
-				if (this.max_height > 0 && (this.dummy.height() + this.line_height > this.max_height))
+				if (this.max_height > 0 && (this.dummy.height() > this.max_height))
 				{
-					this.textarea.css('overflow-y', 'auto');
-					this.textarea.css('height', this.max_height);	//Added this line to enfore the max height if content length more than max height.
+					this.textarea.css('overflow-y', 'auto');	
 				}
 				else
 				{
 					this.textarea.css('overflow-y', 'hidden');
-					if (this.textarea.height() < this.dummy.height() + this.line_height || (this.dummy.height() < this.textarea.height()))
+					if ((this.dummy.height() != this.dummy.old_height) && (this.textarea.height() < this.dummy.height() || (this.dummy.height() < this.textarea.height())))
 					{	
-						this.textarea.animate({height: (this.dummy.height() + this.line_height) + 'px'}, 100);	
+						this.dummy.old_height = this.dummy.height();
+						var new_height = (this.dummy.height() < this.min_height) ? this.min_height : this.dummy.height();
+						if (this.set_height != new_height)
+						{
+							this.set_height = new_height;
+							this.textarea.animate({height: (new_height) + 'px'}, 100);	
+						}
 					}
 				}
 			}
