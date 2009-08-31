@@ -54,7 +54,7 @@
 		this.max_height		  	= this.options.maxHeight || parseInt(jQuery(e).css('max-height'),10);;
 		this.textarea		  	= jQuery(e);
 		
-		if(this.line_height == NaN)
+		if(isNaN(this.line_height ))
 		  this.line_height = 0;
 		
 		// Only one textarea activated at a time, the one being used
