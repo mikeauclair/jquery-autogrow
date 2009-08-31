@@ -1,10 +1,4 @@
 /* 
- * jquery autogrow
- * 
- * http://github.com/mikeauclair/jquery-autogrow
- * 
- * Fork of:
- * 
  * Auto Expanding Text Area (1.2.2)
  * by Chrys Bader (www.chrysbader.com)
  * chrysb@gmail.com
@@ -111,7 +105,7 @@
 			var html = this.textarea.val().replace(/(<|>)/g, '');
 			
 			// IE is different, as per usual
-			if ($.browser.msie)
+			if (jQuery.browser.msie)
 			{
 				html = html.replace(/\n/g, '<BR>new') + '<BR>new<BR>new';
 			}
